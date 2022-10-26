@@ -127,19 +127,13 @@ class FlightServer(paf.FlightServerBase):
             
 
     def do_put(self, context, descriptor, reader, writer):
-        #print("DESCRIPTOR:", descriptor)
         key = FlightServer.descriptor_to_key(descriptor)
         print("Received put command with key:", key)
         self.flights[key] = reader.read_all()
         self.store_key(key)
         filepath = key[2][0].decode("utf-8")+'.parquet'
         pq.write_table(self.flights[key], filepath)
-        #with pq.ParquetWriter(filepath, reader.schema) as writer:
-        #    for chunk in reader:
-        #        writer.write_table(pa.Table.from_batches([chunk.data]))
-        #self.flights[key] = reader.read_all()
         print("Writing to " + filepath)
-#        writer.close()
 
     def do_get(self, context, ticket):
         key = ast.literal_eval(ticket.ticket.decode())

@@ -1,16 +1,11 @@
-import argparse
-import cmd
 from fileinput import filename
-import sys
 import os
 
 import pyarrow as pa
 import pyarrow.flight as paf
 import pyarrow.parquet as pq
 import pyarrow.csv as csv
-import types
 
-import inspect
 
 class RemoteDataset:
     DEFAULT_LOCALHOST = "localhost:5005"
