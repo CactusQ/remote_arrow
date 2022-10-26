@@ -1,7 +1,7 @@
 # Remote datasets on Apache Arrow Flight
 Python scripts for running an [Apache Arrow Flight ](https://arrow.apache.org/blog/2019/10/13/introducing-arrow-flight/ "Apache Arrow Flight ")server that stores and modifies Apache Arrow Tables via remote procedure calls.
 
-###Motivation
+### Motivation
 
 Imagine you have a very large dataset that needs to be accessed and even modified by multiple clients that work together (e.g. a web-based application for viewing the data, and a separate python client that fetches part of the data for ML training).
 
@@ -74,5 +74,8 @@ age_sorted = table_b.sort_by("age")
 # All 3 Tables are available as Flights (original, first 4 rows, sorted by age)
 table_b.list_flights()
 
-
 ```
+
+
+
+Note, that you do not need **RemoteDataset** if you want to implement clients in other languages or frameworks. As long as you follow the [Apache Arrow Flight API](https://arrow.apache.org/docs/format/Flight.html "Apache Arrow Flight API"), you can access all Flights on the server, though without the remote procedure call wrapping.
