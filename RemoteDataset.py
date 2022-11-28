@@ -167,7 +167,7 @@ class RemoteDataset:
             args_dict = {i: args[i] for i in range(len(args))}
             cmd_string = self.DELIMITER.join([str(self.id), attr_name, str(args_dict), str(kwarg)])
             descriptor = paf.FlightDescriptor.for_command(cmd_string)
-            self.get_flight(descriptor)
+            return self.get_flight(descriptor)
 
         return rpc
 
