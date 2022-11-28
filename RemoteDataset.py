@@ -1,5 +1,5 @@
-from fileinput import filename
 import os
+import ast
 
 import pyarrow as pa
 import pyarrow.flight as paf
@@ -61,7 +61,6 @@ class RemoteDataset:
                 self.table = self.table
                 self.override_functions()
                 return
-
         print(f"ERROR: flight_id {flight_id} not found.")
         return
 
@@ -153,7 +152,7 @@ class RemoteDataset:
             print("Type:", action.type)
             print("Description:", action.description)
             print('---')
-                
+
     # Override local ArrowTable methods to their RPC version
     def override_functions(self):
         for attr_name in dir(pa.Table):
@@ -168,14 +167,29 @@ class RemoteDataset:
             cmd_string = self.DELIMITER.join([str(self.id), attr_name, str(args_dict), str(kwarg)])
             descriptor = paf.FlightDescriptor.for_command(cmd_string)
             return self.get_flight(descriptor)
-
         return rpc
 
     @classmethod
     def descriptor_to_readable(self, descriptor):
         if descriptor.descriptor_type == paf.DescriptorType.PATH:
-            return str(descriptor.path[0].decode("utf-8"))
+            return descriptor.path[0].decode("utf-8")
         elif descriptor.descriptor_type == paf.DescriptorType.CMD:
-            return (str(descriptor.path), descriptor)
+            decoded_str = descriptor.command.decode("utf-8")
+
+            id, method, strargs, strkwargs = decoded_str.split(RemoteDataset.DELIMITER)
+            args = tuple(ast.literal_eval(strargs).values())
+
+            # Parse cmd_string to human readable function call
+            result = f"<Flight {id}>.{method}("
+            for i in range(len(args)):
+                result += str(args[i])+", "
+
+            kwargs = ast.literal_eval(strkwargs)
+            for k, v in kwargs.items():
+                result += str(k)+"="+str(v)+", "
+            if result[-2:] == ", ":
+                result = result[:-2]
+            result += ")"
+            return result
         else:
             return None

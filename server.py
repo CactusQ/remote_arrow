@@ -11,7 +11,6 @@ import pyarrow.parquet as pq
 
 from RemoteDataset import RemoteDataset
 
-from ast import literal_eval as make_tuple
 
 class FlightServer(paf.FlightServerBase):
     def __init__(self, host="localhost", location=None,
