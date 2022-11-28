@@ -7,7 +7,7 @@ Imagine you have a very large dataset that needs to be accessed and even modifie
 
 It would be unhandy for all clients to download the large dataset, compute different query results locally and synchronize the results with each other. This may cause a lot of redundant computations and data transmissions.
 
-Instead you may want one centralized location where all the original data resides, and query results can be computed there and subsequently made accessible to all clients.
+Instead, you may want one centralized location, i.e. a server, where all the original data resides. That server can also receive and compute queries and subsequently make the results accessible to all clients.
 
 ### How it works
 

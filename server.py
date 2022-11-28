@@ -9,8 +9,7 @@ import pyarrow as pa
 import pyarrow.flight as paf
 import pyarrow.parquet as pq
 
-from RemoteDataset import RemoteDataset
-
+from RemoteArrow import RemoteDataset
 
 class FlightServer(paf.FlightServerBase):
     def __init__(self, host="localhost", location=None,
@@ -25,16 +24,19 @@ class FlightServer(paf.FlightServerBase):
         self.id_to_key = {}
         self.id_counter = 0
 
+        # Dictionary with (key: PyArrow.Table)
         self.flights = {}
-        for filepath in os.listdir(os.getcwd()):
-             if filepath.endswith(".parquet"):
+        self.datasets_path = os.getcwd()+"/datasets/"
+
+        for filename in os.listdir(self.datasets_path):
+             if filename.endswith(".parquet"):
                 # Generate descriptor from file name and cast to a key
-                filename = os.path.basename(filepath).split('.')[0]
                 desc = pa.flight.FlightDescriptor.for_path(filename)
                 key = FlightServer.descriptor_to_key(desc)
-                self.flights[key] = pq.read_table(filename+'.parquet', memory_map=True)
-                self.store_key(key)     
-                print("Loaded from disk: " + filename+'.parquet')
+                self.flights[key] = pq.read_table(self.datasets_path+filename, memory_map=True)
+                print(f"Loaded from disk to Flight {self.id_counter}: {filename}")
+                self.store_key(key)
+
         self.host = host
 
     @classmethod
@@ -134,8 +136,8 @@ class FlightServer(paf.FlightServerBase):
             table = self.flights[key]
             if not filename.endswith(".parquet"):
                 filename += ".parquet"
-            pq.write_table(table, filename)
-            print("Writing to: " + filename)
+            pq.write_table(table, self.datasets_path + filename)
+            print("Saved dataset to: " + self.datasets_path + filename)
             return True
         else:
             return False
@@ -148,7 +150,7 @@ class FlightServer(paf.FlightServerBase):
 
             if paf.DescriptorType(key[0]) == paf.DescriptorType.PATH:
                 filename = key[2][0].decode("utf-8")+'.parquet'
-                for filepath in os.listdir(os.getcwd()):
+                for filepath in self.datasets_path:
                     if filepath.endswith(filename):
                         os.remove(filepath)
             return True
@@ -162,18 +164,17 @@ class FlightServer(paf.FlightServerBase):
 
     def do_put(self, context, descriptor, reader, writer):
         key = FlightServer.descriptor_to_key(descriptor)
-        print("Received put command with key:", key)
-        #self.flights[key] = reader.read_all()
-        #table = self.flights[key]
-        filepath = key[2][0].decode("utf-8")+'.parquet'
-        #pq.write_table(self.flights[key], filepath)
+        filename = key[2][0].decode("utf-8")+'.parquet'
+        filepath = self.datasets_path + filename
+
         if key not in self.flights:
             with pq.ParquetWriter(filepath, reader.schema) as writer:
                 for chunk in reader:
                     writer.write_table(pa.Table.from_batches([chunk.data]))
+    
             self.flights[key] = reader.read_all()
             self.store_key(key)
-            print("Writing to: " + filepath)
+            print("Saved dataset to: " + self.datasets_path + filename)
             writer.close()
         else:
             raise KeyError(f"Flight with same filename ({filepath}) already exists. Rename to avoid ambiguity.")
