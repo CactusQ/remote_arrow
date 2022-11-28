@@ -31,7 +31,8 @@ class FlightServer(paf.FlightServerBase):
         for filename in os.listdir(self.datasets_path):
              if filename.endswith(".parquet"):
                 # Generate descriptor from file name and cast to a key
-                desc = pa.flight.FlightDescriptor.for_path(filename)
+                name, _parquet_suffix = filename.split(".")
+                desc = pa.flight.FlightDescriptor.for_path(name)
                 key = FlightServer.descriptor_to_key(desc)
                 self.flights[key] = pq.read_table(self.datasets_path+filename, memory_map=True)
                 print(f"Loaded from disk to Flight {self.id_counter}: {filename}")
@@ -172,9 +173,9 @@ class FlightServer(paf.FlightServerBase):
                 for chunk in reader:
                     writer.write_table(pa.Table.from_batches([chunk.data]))
     
-            self.flights[key] = reader.read_all()
+            self.flights[key] = pq.read_table(self.datasets_path+filename, memory_map=True)
             self.store_key(key)
-            print("Saved dataset to: " + self.datasets_path + filename)
+            print("Saved dataset as: " + self.datasets_path + filename)
             writer.close()
         else:
             raise KeyError(f"Flight with same filename ({filepath}) already exists. Rename to avoid ambiguity.")
@@ -186,10 +187,10 @@ class FlightServer(paf.FlightServerBase):
         elif paf.DescriptorType(key[0]) == paf.DescriptorType.CMD:
             return paf.RecordBatchStream(self.flights[key])
 
-        # Read file in batches instead from table
+        # Read file in batches from local file instead from table
         if len(key[2]) == 0: return
         filename = key[2][0].decode("utf-8")
-        reader = pq.ParquetFile(filename+'.parquet', memory_map=True)
+        reader = pq.ParquetFile(self.datasets_path+filename+'.parquet', memory_map=True)
         return paf.GeneratorStream(
             reader.schema_arrow, reader.iter_batches())
 
@@ -215,7 +216,7 @@ class FlightServer(paf.FlightServerBase):
         elif action.type == "save":
             target_id, filename = body_str.split(" ")
             if self.save_flight(target_id, filename):
-                msg = f"Successfully saved flight {target_id} to {filename}"
+                msg = f"Successfully saved flight {target_id} as {filename}"
             else:
                 msg = f"Could not save {target_id}. Flight not found."
             yield paf.Result(msg.encode("utf-8"))

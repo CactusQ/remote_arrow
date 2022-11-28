@@ -11,7 +11,7 @@ class RemoteDataset:
     DEFAULT_LOCALHOST = "localhost:5005"
     DELIMITER = "$"
 
-    def __init__(self, filepath=None, hostname=DEFAULT_LOCALHOST):
+    def __init__(self, filepath=None, target_id=None,  hostname=DEFAULT_LOCALHOST):
         self.host, self.port = hostname.split(':')
         self.client = paf.FlightClient(f"grpc+tcp://{self.host}:{self.port}")
         self.descriptor = None
@@ -20,8 +20,11 @@ class RemoteDataset:
         self.id = None
 
         if not filepath:
-            print(f"No file path given. Connect to one of the available flights:")
-            self.list_flights()
+            if not target_id:
+                print(f"No file path or flight_id given. Connect to one of the available flights:")
+                self.list_flights()
+            else:
+                self.connect(target_id)
 
         else:
             filename, fileext = os.path.basename(filepath).split('.')
@@ -58,9 +61,9 @@ class RemoteDataset:
                 self.descriptor = flight.descriptor
                 print("Successfully connected to flight ", id)
                 self.id = id
-                self.table = self.table
                 self.override_functions()
                 return
+
         print(f"ERROR: flight_id {flight_id} not found.")
         return
 
@@ -133,11 +136,11 @@ class RemoteDataset:
             print(f"ERROR: target_flight {target_id} not found.")
 
     # Send a do action command of given type and body
-    def send_action(self, type, buf_str=None):
+    def action(self, type, body=None):
         try:
             buf = pa.allocate_buffer(0)
-            if buf_str:
-                buf = buf_str.encode("utf-8")
+            if body:
+                buf = body.encode("utf-8")
             action = pa.flight.Action(type, buf)
             print('Running action', type)
             for result in self.client.do_action(action):
