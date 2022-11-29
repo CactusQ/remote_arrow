@@ -1,5 +1,5 @@
-# Remote datasets on Apache Arrow Flight
-Python scripts for running an [Apache Arrow Flight ](https://arrow.apache.org/blog/2019/10/13/introducing-arrow-flight/ "Apache Arrow Flight ")server that stores and modifies Apache Arrow Tables via remote procedure calls.
+# Remote Arrow
+**Remote Arrow* is a prototype [Apache Arrow Flight ](https://arrow.apache.org/blog/2019/10/13/introducing-arrow-flight/ "Apache Arrow Flight ")server that allows clients to store and modify **Apache Arrow** Tables via remote procedure calls.
 
 ### Motivation
 
