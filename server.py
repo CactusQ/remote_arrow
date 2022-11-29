@@ -40,6 +40,10 @@ class FlightServer(paf.FlightServerBase):
 
         self.host = host
 
+        # Delete flights will be rerouted to an empty table
+        self.DELETED_KEY = self.descriptor_to_key(paf.FlightDescriptor.for_command("DELETED"))
+        self.flights[self.DELETED_KEY] = pa.Table.from_pydict({})
+
     @classmethod
     def descriptor_to_key(self, descriptor):
         return (descriptor.descriptor_type.value, descriptor.command,
@@ -51,9 +55,6 @@ class FlightServer(paf.FlightServerBase):
         self.id_counter += 1
 
     def _make_flight_info(self, key, descriptor, table):
-        if descriptor.descriptor_type == paf.DescriptorType.UNKNOWN:
-            return paf.FlightInfo(None, descriptor, None, 0, 0)
-
         location = paf.Location.for_grpc_tcp(
         self.host, self.port)
         endpoints = [paf.FlightEndpoint(repr(key), [location]), ]
@@ -70,9 +71,7 @@ class FlightServer(paf.FlightServerBase):
     def list_flights(self, context, criteria):
         for id, key in self.id_to_key.items():
             table = self.flights[key]
-            if key == None:
-                descriptor = paf.FlightDescriptor(descriptor_type = paf.DescriptorType.UNKNOWN)
-            elif key[1] is not None:
+            if key[1] is not None:
                 descriptor = paf.FlightDescriptor.for_command(key[1])
             else:
                 descriptor = paf.FlightDescriptor.for_path(*key[2])
@@ -146,14 +145,15 @@ class FlightServer(paf.FlightServerBase):
     def delete_flight(self, delete_id) -> bool:
         if delete_id in self.id_to_key and self.id_to_key[delete_id] != None:
             key = self.id_to_key[delete_id]
-            self.id_to_key[delete_id] = None
             self.flights.pop(key)
+
+            self.id_to_key[delete_id] = self.DELETED_KEY
 
             if paf.DescriptorType(key[0]) == paf.DescriptorType.PATH:
                 filename = key[2][0].decode("utf-8")+'.parquet'
-                for filepath in self.datasets_path:
+                for filepath in os.listdir(self.datasets_path):
                     if filepath.endswith(filename):
-                        os.remove(filepath)
+                        os.remove(self.datasets_path+filepath)
             return True
         else:
             return False
@@ -167,7 +167,7 @@ class FlightServer(paf.FlightServerBase):
         key = FlightServer.descriptor_to_key(descriptor)
         filename = key[2][0].decode("utf-8")+'.parquet'
         filepath = self.datasets_path + filename
-
+        
         if key not in self.flights:
             with pq.ParquetWriter(filepath, reader.schema) as writer:
                 for chunk in reader:

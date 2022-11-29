@@ -91,11 +91,11 @@ class RemoteDataset:
         for id, flight in enumerate(self.client.list_flights()):
             descriptor = flight.descriptor
             if descriptor.descriptor_type == paf.DescriptorType.PATH:
-                print(f"{id}\tFILE\t", RemoteDataset.descriptor_to_readable(descriptor))
+                print(f"{id}", RemoteDataset.descriptor_to_readable(descriptor))
             elif descriptor.descriptor_type == paf.DescriptorType.CMD:
-                print(f"{id}\tCMD\t", RemoteDataset.descriptor_to_readable(descriptor))
+                print(f"{id}", RemoteDataset.descriptor_to_readable(descriptor))
             else:
-                print(f"{id} \tN/A\t Flight has been deleted")
+                print(f"{id} \tN/A\t UNKNOWN")
         print("")
 
     # Read metadata of a flight (number of rows, bytes, schema)
@@ -105,13 +105,12 @@ class RemoteDataset:
         for id, flight in enumerate(self.client.list_flights()):
             if id == target_id:
                 descriptor = flight.descriptor
-                if descriptor.descriptor_type == paf.DescriptorType.UNKNOWN:
-                    print("Flight {target_id} has been deleted.")
-                    break
                 if descriptor.descriptor_type == paf.DescriptorType.PATH:
-                    print("File:", str(descriptor.path[0].decode("utf-8")))
+                    print(f"{id}", RemoteDataset.descriptor_to_readable(descriptor))
                 elif descriptor.descriptor_type == paf.DescriptorType.CMD:
-                    print("Command:", descriptor.command)
+                    print(f"{id}", RemoteDataset.descriptor_to_readable(descriptor))
+                else:
+                    print(f"{id} \tN/A\t UNKNOWN")
                 target_flight = flight
                 break
             
@@ -174,15 +173,18 @@ class RemoteDataset:
     @classmethod
     def descriptor_to_readable(self, descriptor):
         if descriptor.descriptor_type == paf.DescriptorType.PATH:
-            return descriptor.path[0].decode("utf-8")
+            return "\tFILE\t"+descriptor.path[0].decode("utf-8")
         elif descriptor.descriptor_type == paf.DescriptorType.CMD:
             decoded_str = descriptor.command.decode("utf-8")
+
+            if decoded_str == "DELETED":
+                return "\tN/A\tThis flight has been deleted."
 
             id, method, strargs, strkwargs = decoded_str.split(RemoteDataset.DELIMITER)
             args = tuple(ast.literal_eval(strargs).values())
 
             # Parse cmd_string to human readable function call
-            result = f"<Flight {id}>.{method}("
+            result = f"\tCMD\t <Flight {id}>.{method}("
             for i in range(len(args)):
                 result += str(args[i])+", "
             kwargs = ast.literal_eval(strkwargs)
