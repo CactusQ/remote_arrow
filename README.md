@@ -24,6 +24,8 @@ Run the following command and follow the instructions on the terminal:
 ```
 docker run --rm -p 8888:8888 hoangln1/remote_arrow:tutorial
 ```
+<br>
+
 
 ## Run server locally
 
