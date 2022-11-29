@@ -18,14 +18,20 @@ That way, different clients can **A) work on the same datasets** without actuall
 
 
 ### Requirements and setup
+## Docker (Jupyter Notebook Tutorial)
 
-Install pyarrow:
+Run the following command and follow the instructions on the terminal:
+```
+docker run --rm -p 8888:8888 hoangln1/remote_arrow:tutorial
+```
+
+## Run server locally
+
+**Clone the repository** and install pyarrow:
 ```pip3 install pyarrow```
 
 Run the server (default host is **localhost:5005**):
 ```python3 server.py --host <address> --port <port>```
-
-
 
 
 The class **RemoteDataset** allows Python clients to upload datasets to the server (*CSV, pandas df, PARQUET*) and execute remote procedure calls disguised as local methods from [PyArrow Table](https://arrow.apache.org/docs/python/generated/pyarrow.Table.html "PyArrow Table"). 
@@ -79,3 +85,5 @@ table_b.list_flights()
 
 
 Note, that you do not need **RemoteDataset** if you want to implement clients in other languages or frameworks. As long as you follow the [Apache Arrow Flight API](https://arrow.apache.org/docs/format/Flight.html "Apache Arrow Flight API"), you can access all Flights on the server, though without the remote procedure call wrapping.
+
+
