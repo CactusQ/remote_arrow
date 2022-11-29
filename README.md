@@ -86,6 +86,9 @@ table_b.list_flights()
 
 
 
-Note, that you do not need **RemoteDataset** if you want to implement clients in other languages or frameworks. As long as you follow the [Apache Arrow Flight API](https://arrow.apache.org/docs/format/Flight.html "Apache Arrow Flight API"), you can access all Flights on the server, though without the remote procedure call wrapping.
+Note, that you do not need **RemoteDataset** if you want to implement clients in other languages or frameworks. <br<
+As long as you follow the [Apache Arrow Flight API](https://arrow.apache.org/docs/format/Flight.html "Apache Arrow Flight API"), you can access all Flights on the server, though without the remote procedure call wrapping. <br>
+
+For a more in-depth explanation and documentation refer to the **Jupyter Notebook Tutorial**.
 
 
