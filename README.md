@@ -26,8 +26,7 @@ docker run --rm -p 8888:8888 hoangln1/remote_arrow:tutorial
 ```
 <br>
 
-Alternatively, you can ```pip3 install pyarrow pandas``` and run the notebook locally. <br>
-You will need to provide your own **CSV file** in lieu of the one used in the Docker container (*hawaii_covid.csv*).
+Alternatively, you can download and run the notebook locally. <br>
 
 
 ### Running the server
