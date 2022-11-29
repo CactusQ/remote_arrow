@@ -27,6 +27,8 @@ class FlightServer(paf.FlightServerBase):
         # Dictionary with (key: PyArrow.Table)
         self.flights = {}
         self.datasets_path = os.getcwd()+"/datasets/"
+        if not os.path.exists(self.datasets_path):
+            os.makedirs(self.datasets_path)
 
         for filename in os.listdir(self.datasets_path):
              if filename.endswith(".parquet"):
