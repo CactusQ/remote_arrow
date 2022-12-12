@@ -3,9 +3,9 @@
 
 ## Motivation
 
-Imagine you have a very large dataset that needs to be accessed and even modified by multiple clients that are written in different languages. The clients may work in the context of a larger application, for example a web-based tool for machine learning where a **React App** serves as a UX for uploading and viewing datasets, and a separate **Python client** in the background needs fetches that data in batches for NN training.
+Imagine you have a very large dataset that needs to be accessed and even modified by multiple clients that may be written in different programming languages. The clients may work in the context of a larger application, for example a web-based tool for machine learning where a **React App** serves as a UX for uploading and viewing datasets, and a separate **Python client** in the background fetches data in batches for Neural Network training.
 
-It would be unhandy for your clients to each download the entire dataset and process them locally. This may cause a lot of redundant computations and a significant overhead for data transmissions (i.e. passing query results around and synchronizing work).
+It would be unhandy for your clients to each download the entire dataset, process them locally, and communicate the result with each other. This may cause a lot of redundant computations and a significant overhead for data transmissions (i.e. passing query results around and synchronizing work).
 
 Instead, you may want one centralized location, i.e. a server, where all the data resides. That server may then receive all queries and subsequently make the results accessible to all clients.
 
