@@ -47,7 +47,7 @@ In other words, local function calls are overridden with RPCs, so that the exact
 ```
 from RemoteArrow import RemoteDataset
 
-# Uploads file to the server, and connects object (table) to the resulting Flight
+# Uploads file to the server, and connects to the resulting Flight
 client_A = RemoteDataset("some_file.csv")
 
 # Take first 4 rows (remote procedure call)
