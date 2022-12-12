@@ -52,7 +52,7 @@ class FlightServer(paf.FlightServerBase):
                 tuple(descriptor.path or tuple()))
     
     def store_key(self, key):
-        # IDs are internally handeled as strings
+        # IDs are internally handeled as strings not int
         self.id_to_key[str(self.id_counter)] = key
         self.id_counter += 1
 
@@ -107,12 +107,6 @@ class FlightServer(paf.FlightServerBase):
 
         kwargs = ast.literal_eval(strkwargs)
         kwargs = kwargs if len(kwargs) > 0 else None
-
-        # print("str: ", decoded_str)
-        # print("strargs:", strargs)
-        # print("strkwargs:", strkwargs)
-        # print("args:", args)
-        # print("kwargs:", kwargs)
         key = self.id_to_key[id]
 
         # TODO: can this be done more elegantly?

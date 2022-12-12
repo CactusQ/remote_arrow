@@ -134,7 +134,7 @@ class RemoteDataset:
         else:
             print(f"ERROR: target_flight {target_id} not found.")
 
-    # Send a do action command of given type and body
+    # Send a doAction command of given type and body
     def action(self, type, body=None):
         try:
             buf = pa.allocate_buffer(0)
@@ -170,6 +170,7 @@ class RemoteDataset:
             return self.get_flight(descriptor)
         return rpc
 
+    # For console output only
     @classmethod
     def descriptor_to_readable(self, descriptor):
         if descriptor.descriptor_type == paf.DescriptorType.PATH:
